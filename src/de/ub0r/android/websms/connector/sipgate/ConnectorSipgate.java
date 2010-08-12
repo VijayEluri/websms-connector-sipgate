@@ -99,8 +99,7 @@ public class ConnectorSipgate extends Connector {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected final void doSend(final Context context, final Intent intent)
-			throws WebSMSException {
+	protected final void doSend(final Context context, final Intent intent) {
 		Log.d(TAG, "doSend()");
 		Object back;
 		try {
@@ -153,8 +152,7 @@ public class ConnectorSipgate extends Connector {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	protected final void doUpdate(final Context context, final Intent intent)
-			throws WebSMSException {
+	protected final void doUpdate(final Context context, final Intent intent) {
 		Log.d(TAG, "doUpdate()");
 		Map<String, Object> back = null;
 		try {
