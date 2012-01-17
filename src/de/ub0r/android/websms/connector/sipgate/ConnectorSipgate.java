@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.http.HttpStatus;
 import org.xmlrpc.android.XMLRPCClient;
 import org.xmlrpc.android.XMLRPCException;
 import org.xmlrpc.android.XMLRPCFault;
@@ -34,10 +35,10 @@ import android.preference.PreferenceManager;
 import de.ub0r.android.websms.connector.common.Connector;
 import de.ub0r.android.websms.connector.common.ConnectorCommand;
 import de.ub0r.android.websms.connector.common.ConnectorSpec;
+import de.ub0r.android.websms.connector.common.ConnectorSpec.SubConnectorSpec;
 import de.ub0r.android.websms.connector.common.Log;
 import de.ub0r.android.websms.connector.common.Utils;
 import de.ub0r.android.websms.connector.common.WebSMSException;
-import de.ub0r.android.websms.connector.common.ConnectorSpec.SubConnectorSpec;
 
 /**
  * AsyncTask to manage XMLRPC-Calls to sipgate.de remote-API.
@@ -63,7 +64,7 @@ public class ConnectorSipgate extends Connector {
 		final String name = context.getString(R.string.connector_sipgate_name);
 		ConnectorSpec c = new ConnectorSpec(name);
 		c.setAuthor(// .
-				context.getString(R.string.connector_sipgate_author));
+		context.getString(R.string.connector_sipgate_author));
 		c.setBalance(null);
 		c.setCapabilities(ConnectorSpec.CAPABILITIES_UPDATE
 				| ConnectorSpec.CAPABILITIES_SEND
@@ -123,8 +124,8 @@ public class ConnectorSipgate extends Connector {
 			rr = null;
 			Hashtable<String, Serializable> params = // .
 			new Hashtable<String, Serializable>();
-			final String sender = Utils.getSender(context, command
-					.getDefSender());
+			final String sender = Utils.getSender(context,
+					command.getDefSender());
 			if (sender.length() > 6) {
 				String localUri = "sip:" + sender.replaceAll("\\+", "")
 						+ "@sipgate.net";
@@ -137,7 +138,7 @@ public class ConnectorSipgate extends Connector {
 			Log.d(TAG, back.toString());
 		} catch (XMLRPCFault e) {
 			Log.e(TAG, null, e);
-			if (e.getFaultCode() == Utils.HTTP_SERVICE_UNAUTHORIZED) {
+			if (e.getFaultCode() == HttpStatus.SC_UNAUTHORIZED) {
 				throw new WebSMSException(context, R.string.error_pw);
 			}
 			throw new WebSMSException(e);
@@ -159,8 +160,7 @@ public class ConnectorSipgate extends Connector {
 			XMLRPCClient client = this.init(context);
 			back = (Map<String, Object>) client.call("samurai.BalanceGet");
 			Log.d(TAG, back.toString());
-			if (back.get("StatusCode").equals(
-					new Integer(Utils.HTTP_SERVICE_OK))) {
+			if (back.get("StatusCode").equals(new Integer(HttpStatus.SC_OK))) {
 				final String b = String.format("%.2f \u20AC",
 						((Double) ((Map<String, Object>) back
 								.get("CurrentBalance"))
@@ -169,7 +169,7 @@ public class ConnectorSipgate extends Connector {
 			}
 		} catch (XMLRPCFault e) {
 			Log.e(TAG, null, e);
-			if (e.getFaultCode() == Utils.HTTP_SERVICE_UNAUTHORIZED) {
+			if (e.getFaultCode() == HttpStatus.SC_UNAUTHORIZED) {
 				throw new WebSMSException(context, R.string.error_pw);
 			}
 			throw new WebSMSException(e);
@@ -202,9 +202,9 @@ public class ConnectorSipgate extends Connector {
 			client = new XMLRPCClient(SIPGATE_URL);
 		}
 
-		client.setBasicAuthentication(p.getString(
-				Preferences.PREFS_USER_SIPGATE, ""), p.getString(
-				Preferences.PREFS_PASSWORD_SIPGATE, ""));
+		client.setBasicAuthentication(
+				p.getString(Preferences.PREFS_USER_SIPGATE, ""),
+				p.getString(Preferences.PREFS_PASSWORD_SIPGATE, ""));
 		Object back;
 		try {
 			Hashtable<String, String> ident = new Hashtable<String, String>();
